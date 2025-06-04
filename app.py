@@ -1,3 +1,4 @@
+
 import streamlit as st
 from openai import OpenAI
 
@@ -90,7 +91,7 @@ if user_input:
                 max_tokens=300
             )
             answer = response.choices[0].message.content
-            st.markdown("### 🌸 Here's your tip:")
+            st.markdown("### Our thoughts:")
             st.write(answer)
         except Exception as e:
             st.warning("🚫 Something went wrong. Please wait a moment and try again 🌿")
@@ -114,5 +115,5 @@ with st.expander("🔁 10 Sustainable Swap Ideas"):
 
 # Footer
 st.markdown("---")
-st.caption("Created with 🌿 by The Eco Connection | Powered by Streamlit & OpenAI")
+st.caption("Created by The Eco Connection | Made with love by Maressa Benz")
 
