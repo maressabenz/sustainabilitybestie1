@@ -49,9 +49,6 @@ try:
             answer = response.choices[0].message.content
             st.markdown("### 🌸 Here's your tip:")
             st.write(answer)
-except ModuleNotFoundError:
-    st.error("The 'openai' package is missing. Please make sure your 'requirements.txt' file includes 'openai'.")
-    st.code("requirements.txt should include:\nstreamlit\nopenai")
 
 st.markdown("---")
-st.caption("Created with 🌿 by The Eco Connection | Powered by Streamlit")
+st.caption("Created with 🌿 by The Eco Connection")
