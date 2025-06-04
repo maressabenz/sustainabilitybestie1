@@ -1,7 +1,5 @@
-
 import streamlit as st
 from openai import OpenAI
-from openai.types.error import RateLimitError
 
 # Page configuration
 st.set_page_config(page_title="Eco Bestie 🌿", layout="centered")
@@ -34,7 +32,7 @@ st.markdown("""
 st.title("🌿 Your Eco Bestie")
 st.write("Ask anything about sustainable living, low-waste habits, or eco-friendly swaps. You can also explore some of my favorite product recommendations, eco tips, and sustainable swaps.")
 
-# Static lists for product recs, eco tips, and swap ideas
+# Static lists
 product_recs = [
     "🌸 Shampoo Bar from Ethique — plastic-free and long-lasting",
     "🧴 Refillable glass hand soap from Blueland",
@@ -74,7 +72,7 @@ swap_ideas = [
     "🛒 Bring containers to refill stores for pantry items or cleaners."
 ]
 
-# User question input
+# User input
 user_input = st.text_input("💬 What would you like to ask?")
 
 # Handle OpenAI response
@@ -94,10 +92,8 @@ if user_input:
             answer = response.choices[0].message.content
             st.markdown("### 🌸 Here's your tip:")
             st.write(answer)
-        except RateLimitError:
-            st.warning("🚫 Too many requests! Please wait a moment and try again 🌿")
         except Exception as e:
-            st.error("Something went wrong.")
+            st.warning("🚫 Something went wrong. Please wait a moment and try again 🌿")
             st.code(str(e))
 
 # Divider section
@@ -119,3 +115,4 @@ with st.expander("🔁 10 Sustainable Swap Ideas"):
 # Footer
 st.markdown("---")
 st.caption("Created with 🌿 by The Eco Connection | Powered by Streamlit & OpenAI")
+
