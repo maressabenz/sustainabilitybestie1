@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from openai import OpenAI
 
 # --- CONFIG & STYLE ---
@@ -32,26 +33,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- DATA ---
-products = [
-    {"emoji": "🧴", "title": "Shampoo Bar", "desc": "Plastic-free and nourishing.", "link": "https://youraffiliate.link/shampoo"},
-    {"emoji": "🛍", "title": "Produce Bags", "desc": "Reusable cotton for grocery runs.", "link": "https://yourblog.com/produce-bags"},
-    {"emoji": "🧼", "title": "Compostable Sponges", "desc": "Biodegradable & zero waste.", "link": "https://yourblog.com/kitchen-swaps"},
-]
+# --- LOAD DATA FROM CSV ---
+@st.cache_data
+def load_data():
+    return pd.read_csv("eco_bestie_content.csv")
 
-eco_tips = [
-    {"emoji": "🍃", "title": "Slow Mornings", "desc": "Start your day with tea, barefoot on the earth.", "link": ""},
-    {"emoji": "🌞", "title": "Line Drying", "desc": "Let the sun do the work — no dryer needed.", "link": ""},
-    {"emoji": "📦", "title": "Reuse Packaging", "desc": "Boxes, jars & wrap get a second life.", "link": ""},
-]
+df = load_data()
 
-swaps = [
-    {"emoji": "🥤", "title": "Bamboo Straw", "desc": "Skip plastic with a reusable straw.", "link": ""},
-    {"emoji": "🧻", "title": "Cloth Napkins", "desc": "Washable and elegant at meals.", "link": ""},
-    {"emoji": "🛁", "title": "Bar Soap", "desc": "Less waste, more luxury.", "link": ""},
-]
+products = df[df["type"] == "product"].to_dict(orient="records")
+eco_tips = df[df["type"] == "eco_tip"].to_dict(orient="records")
+swaps = df[df["type"] == "swap"].to_dict(orient="records")
 
-# --- APP TITLE ---
+# --- TITLE ---
 st.title("🌿 Your Eco Bestie")
 st.write("Hi love — I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
 
@@ -78,7 +71,7 @@ if user_input:
             st.warning("🌧 Hmm... something went wrong. Try again in a bit.")
             st.code(str(e))
 
-# --- VISUAL CARDS ---
+# --- DISPLAY CARDS ---
 def render_cards(data, section_title):
     st.markdown(f"## {section_title}")
     cols = st.columns(3)
@@ -98,4 +91,5 @@ render_cards(eco_tips, "🌱 Gentle Eco Living Tips")
 render_cards(swaps, "🔁 Sustainable Swaps to Try")
 
 st.markdown("---")
-st.caption("Created by The Eco Connection")
+st.caption("Created with 🍃 by The Eco Connection | Personalized by Streamlit & OpenAI")
+
