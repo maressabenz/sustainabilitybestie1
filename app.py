@@ -1,11 +1,9 @@
-
 import streamlit as st
 from openai import OpenAI
 
-# Page configuration
-st.set_page_config(page_title="Eco Bestie 🌿", layout="centered")
+# --- CONFIG & STYLE ---
+st.set_page_config(page_title="Eco Bestie 🌿", layout="wide")
 
-# Apply custom CSS
 st.markdown("""
     <style>
         html, body, [class*="css"] {
@@ -19,101 +17,85 @@ st.markdown("""
             border-radius: 8px;
             padding: 10px;
         }
-        .stButton>button {
-            background-color: #8fb996;
-            color: white;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-weight: bold;
+        .eco-card {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+        }
+        .eco-link {
+            font-size: 14px;
+            color: #4a7c59;
+            text-decoration: none;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Title and welcome message
-st.title("🌿 Your Eco Bestie")
-st.write("Ask anything about sustainable living, low-waste habits, or eco-friendly swaps. You can also explore some of my favorite product recommendations, eco tips, and sustainable swaps.")
-
-# Static lists
-product_recs = [
-    "🌸 Shampoo Bar from Ethique — plastic-free and long-lasting",
-    "🧴 Refillable glass hand soap from Blueland",
-    "🛍 Organic cotton produce bags for grocery trips",
-    "🕯 Coconut wax candles (non-toxic and biodegradable)",
-    "🌱 Grow-your-own herb kits for windowsills",
-    "🧼 Compostable dish scrubbers from ZeroWasteStore",
-    "🚿 Water-saving shower head with filter (Hydraloop or Nebia)",
-    "🧺 Wool dryer balls instead of single-use sheets",
-    "☕ Reusable silicone coffee cup (Stojo or Huskee)",
-    "💧 Filtered glass water bottle (like Soma or Kablo)"
+# --- DATA ---
+products = [
+    {"emoji": "🧴", "title": "Shampoo Bar", "desc": "Plastic-free and nourishing.", "link": "https://youraffiliate.link/shampoo"},
+    {"emoji": "🛍", "title": "Produce Bags", "desc": "Reusable cotton for grocery runs.", "link": "https://yourblog.com/produce-bags"},
+    {"emoji": "🧼", "title": "Compostable Sponges", "desc": "Biodegradable & zero waste.", "link": "https://yourblog.com/kitchen-swaps"},
 ]
 
 eco_tips = [
-    "🌿 Start your morning with a walk in nature — tech-free.",
-    "🍃 Keep a zero-waste kit in your bag (utensils, straw, napkin).",
-    "🧼 DIY your own all-purpose cleaner with vinegar and citrus peels.",
-    "🌎 Choose secondhand or vintage whenever possible.",
-    "🧺 Wash clothes on cold and line-dry when you can.",
-    "🍋 Repurpose citrus rinds for cleaners or infusions.",
-    "🛒 Support local farmers markets for seasonal produce.",
-    "📦 Reuse packaging for storage or gifting.",
-    "🔋 Unplug electronics when not in use — phantom energy adds up.",
-    "🌸 Choose slow, natural rituals that align with your body and cycles."
+    {"emoji": "🍃", "title": "Slow Mornings", "desc": "Start your day with tea, barefoot on the earth.", "link": ""},
+    {"emoji": "🌞", "title": "Line Drying", "desc": "Let the sun do the work — no dryer needed.", "link": ""},
+    {"emoji": "📦", "title": "Reuse Packaging", "desc": "Boxes, jars & wrap get a second life.", "link": ""},
 ]
 
-swap_ideas = [
-    "🧴 Swap plastic shampoo bottles for solid shampoo bars.",
-    "🛍 Replace plastic bags with reusable produce & tote bags.",
-    "🧽 Use compostable dishcloths instead of paper towels.",
-    "💡 Switch to LED bulbs to save energy.",
-    "🥤 Replace plastic straws with bamboo or stainless steel.",
-    "📔 Use a digital planner or refillable notebooks.",
-    "🎁 Wrap gifts in fabric or old maps instead of paper.",
-    "🚿 Use soap bars instead of bottled body wash.",
-    "🥣 Choose bulk goods over packaged whenever you can.",
-    "🛒 Bring containers to refill stores for pantry items or cleaners."
+swaps = [
+    {"emoji": "🥤", "title": "Bamboo Straw", "desc": "Skip plastic with a reusable straw.", "link": ""},
+    {"emoji": "🧻", "title": "Cloth Napkins", "desc": "Washable and elegant at meals.", "link": ""},
+    {"emoji": "🛁", "title": "Bar Soap", "desc": "Less waste, more luxury.", "link": ""},
 ]
 
-# User input
+# --- APP TITLE ---
+st.title("🌿 Your Eco Bestie")
+st.write("Hi love — I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
+
+# --- USER INPUT ---
 user_input = st.text_input("💬 What would you like to ask?")
 
-# Handle OpenAI response
 if user_input:
-    with st.spinner("Thinking green thoughts... 🌱"):
+    with st.spinner("Gathering gentle wisdom... 🌱"):
         try:
             client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You're a kind, empowering sustainability coach who offers practical advice about green living, eco swaps, nature reconnection, thoughtful consumption, and gentle habits. Keep answers friendly, concise, and brand-aligned."},
+                    {"role": "system", "content": "You are Eco Bestie — a warm, encouraging guide who helps people reconnect with nature, reduce waste, and live more intentionally. Your tone is poetic, whimsical, and empowering. Avoid sounding too robotic or corporate."},
                     {"role": "user", "content": user_input}
                 ],
                 temperature=0.7,
                 max_tokens=300
             )
             answer = response.choices[0].message.content
-            st.markdown("### Our thoughts:")
+            st.markdown("### 🌸 Here's your tip:")
             st.write(answer)
         except Exception as e:
-            st.warning("🚫 Something went wrong. Please wait a moment and try again 🌿")
+            st.warning("🌧 Hmm... something went wrong. Try again in a bit.")
             st.code(str(e))
 
-# Divider section
+# --- VISUAL CARDS ---
+def render_cards(data, section_title):
+    st.markdown(f"## {section_title}")
+    cols = st.columns(3)
+    for i, item in enumerate(data):
+        with cols[i % 3]:
+            st.markdown(f"""
+                <div class="eco-card">
+                    <h4>{item['emoji']} {item['title']}</h4>
+                    <p>{item['desc']}</p>
+                    {f'<a class="eco-link" href="{item["link"]}" target="_blank">Learn more →</a>' if item["link"] else ""}
+                </div>
+            """, unsafe_allow_html=True)
+
 st.markdown("---")
+render_cards(products, "🛍 Thoughtful Product Recommendations")
+render_cards(eco_tips, "🌱 Gentle Eco Living Tips")
+render_cards(swaps, "🔁 Sustainable Swaps to Try")
 
-# Expandable sections
-with st.expander("🛍 10 Product Recommendations"):
-    for item in product_recs:
-        st.write(item)
-
-with st.expander("🌱 10 Eco Living Tips"):
-    for tip in eco_tips:
-        st.write(tip)
-
-with st.expander("🔁 10 Sustainable Swap Ideas"):
-    for swap in swap_ideas:
-        st.write(swap)
-
-# Footer
 st.markdown("---")
-st.caption("Created by The Eco Connection | Made with love by Maressa Benz")
-
+st.caption("Created by The Eco Connection")
