@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 from openai import OpenAI
@@ -78,14 +79,27 @@ def render_cards(data, section_title):
     cols = st.columns(3)
     for i, item in enumerate(data):
         with cols[i % 3]:
+            # Make image clickable using separate image_link column
+            image_url = item.get("image", "")
+            image_link = item.get("image_link", item.get("link", ""))  # fallback to link if image_link is missing
+
+            img_html = (
+                f'<a href="{image_link}" target="_blank">'
+                f'<img src="{image_url}" style="width:100%; border-radius:12px; margin-bottom:0.5rem;" />'
+                f'</a>'
+            ) if image_url else ""
+
+            # Display card with image, title, description, and CTA link
             st.markdown(f"""
-                <div class="eco-card">
+                <div style="background-color:#fff; padding:1rem; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center;">
+                    {img_html}
                     <h4>{item['emoji']} {item['title']}</h4>
                     <p>{item['desc']}</p>
-                    {f'<a class="eco-link" href="{item["link"]}" target="_blank">Learn more →</a>' if item["link"] else ""}
+                    <a href="{item['link']}" target="_blank" style="color:#4a7c59; font-weight:500;">Learn more →</a>
                 </div>
             """, unsafe_allow_html=True)
 
+            
 st.markdown("---")
 render_cards(products, "🛍 Thoughtful Product Recommendations")
 render_cards(eco_tips, "🌱 Gentle Eco Living Tips")
