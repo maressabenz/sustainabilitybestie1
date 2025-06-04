@@ -36,7 +36,8 @@ st.markdown("""
 # --- LOAD DATA FROM CSV ---
 @st.cache_data
 def load_data():
-    return pd.read_csv("eco_bestie_content.csv")
+    return sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9X4uUiJ62AowI-E41-Q3CfMP24rFpe6Amci5IdB7gWg8SBCZOX-q4B7J0zv2uXouNo5vBipwxSnKb/pub?output=csv"
+df = pd.read_csv(sheet_url)
 
 df = load_data()
 
