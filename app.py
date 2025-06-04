@@ -33,10 +33,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- LOAD DATA FROM CSV ---
+# --- LOAD DATA FROM GOOGLE SHEETS ---
 @st.cache_data
 def load_data():
-    return sheet_url = ("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9X4uUiJ62AowI-E41-Q3CfMP24rFpe6Amci5IdB7gWg8SBCZOX-q4B7J0zv2uXouNo5vBipwxSnKb/pub?output=csv")
+    sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9X4uUiJ62AowI-E41-Q3CfMP24rFpe6Amci5IdB7gWg8SBCZOX-q4B7J0zv2uXouNo5vBipwxSnKb/pub?output=csv"
+    return pd.read_csv(sheet_url)
 
 df = load_data()
 
@@ -58,7 +59,7 @@ if user_input:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "soft yet clear, reflective but grounded, poetic but not abstract. Speak like a gentle guide. Use language that feels earthy, intentional, and emotionally intelligent. Avoid corporate speak, urgency, or anything overly technical — but don’t oversimplify. Think solarpunk, slow living, and systems-level care."},
+                    {"role": "system", "content": "You are Eco Bestie — a warm, encouraging guide who helps people reconnect with nature, reduce waste, and live more intentionally. Your tone is poetic, whimsical, and empowering. Avoid sounding too robotic or corporate."},
                     {"role": "user", "content": user_input}
                 ],
                 temperature=0.7,
@@ -92,4 +93,5 @@ render_cards(swaps, "🔁 Sustainable Swaps to Try")
 
 st.markdown("---")
 st.caption("Created with 🍃 by The Eco Connection | Personalized by Streamlit & OpenAI")
+
 
