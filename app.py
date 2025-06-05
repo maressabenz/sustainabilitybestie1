@@ -65,6 +65,9 @@ st.write("I'm here to help you live more gently with the Earth. Ask me anything 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+if "user_input" not in st.session_state:
+    st.session_state.user_input = ""
+
 # --- CHAT HEADER ---
 st.markdown("### 🌿 Chat with Eco Bestie")
 
@@ -76,17 +79,18 @@ for pair in st.session_state.chat_history:
 chat_html += '</div>'
 st.markdown(chat_html, unsafe_allow_html=True)
 
-# --- USER INPUT ---
-user_input = st.text_input("Type your question", placeholder="e.g. What are some low-waste bathroom swaps?")
+# --- USER INPUT FIELD ---
+st.text_input("Type your question", key="user_input", placeholder="e.g. What are some low-waste bathroom swaps?")
 
-if user_input:
+# --- PROCESS USER INPUT ---
+if st.session_state.user_input:
     with st.spinner("Eco Bestie is thinking... 🌱"):
         try:
             messages = [{"role": "system", "content": "You are Eco Bestie, a grounded, practical, and kind sustainability guide who speaks like a thoughtful friend. Avoid fantasy language. Keep it real, relatable, and warm."}]
             for pair in st.session_state.chat_history:
                 messages.append({"role": "user", "content": pair["user"]})
                 messages.append({"role": "assistant", "content": pair["bot"]})
-            messages.append({"role": "user", "content": user_input})
+            messages.append({"role": "user", "content": st.session_state.user_input})
 
             client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
             response = client.chat.completions.create(
@@ -97,7 +101,12 @@ if user_input:
             )
 
             reply = response.choices[0].message.content.strip()
-            st.session_state.chat_history.append({"user": user_input, "bot": reply})
+            st.session_state.chat_history.append({
+                "user": st.session_state.user_input,
+                "bot": reply
+            })
+
+            st.session_state.user_input = ""
             st.rerun()
 
         except Exception as e:
