@@ -99,7 +99,7 @@ with st.form("chat_form", clear_on_submit=True):
     if submitted and user_input.strip():
         st.session_state.chat_history.append({"user": user_input.strip(), "bot": "Eco Bestie is thinking..."})
         st.session_state.user_input = user_input.strip()
-        st.experimental_rerun()
+st.rerun()
 
 # --- GET RESPONSE ---
 if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] == "Eco Bestie is thinking...":
@@ -119,7 +119,7 @@ if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] ==
     )
     reply = response.choices[0].message.content.strip()
     st.session_state.chat_history[-1]["bot"] = reply
-    st.experimental_rerun()
+st.rerun()
 
 # --- RESET BUTTON ---
 if st.button("🧹 Start Over"):
