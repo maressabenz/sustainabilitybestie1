@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from openai import OpenAI
-import time
 
 # --- CONFIG & STYLE ---
 st.set_page_config(page_title="Eco Bestie by The Eco Connection🌿", layout="centered")
@@ -33,12 +32,12 @@ st.markdown("""
             height: 20px;
             background-color: #d4d4d4;
             border-radius: 10px;
-            margin: 8px auto;
+            margin: 8px auto 4px auto;
         }
         .chat-area {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 10px 12px 60px 12px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
         }
@@ -60,39 +59,30 @@ st.markdown("""
             max-width: 75%;
             align-self: flex-start;
         }
-        .typing-indicator {
-            background-color: #e5e5ea;
-            border-radius: 20px;
-            padding: 6px 14px;
-            margin: 6px 0;
-            max-width: 75%;
-            font-style: italic;
-            opacity: 0.7;
-        }
         .input-bar {
-            position: absolute;
-            bottom: 10px;
-            left: 12px;
-            right: 12px;
+            padding: 10px 12px;
             display: flex;
+            gap: 10px;
             align-items: center;
             background-color: #f1f1f1;
-            border-radius: 999px;
-            padding: 10px 12px;
+            border-top: 1px solid #ccc;
         }
         .input-bar input {
             flex-grow: 1;
-            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            border: 1px solid #ccc;
             outline: none;
-            background: transparent;
             font-size: 14px;
         }
-        .input-bar button {
-            background: none;
+        .send-button {
+            background-color: #00c759;
             border: none;
-            font-size: 18px;
-            color: #00c759;
-            margin-left: 10px;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
         }
     </style>
@@ -127,32 +117,22 @@ for chat in st.session_state.chat_history:
     st.markdown(f'<div class="bubble-bot">{chat["bot"]}</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- INPUT BAR ---
-with st.form(key="chat_form", clear_on_submit=True):
-    col1, col2 = st.columns([6, 1])
-    with col1:
-        user_input = st.text_input("", placeholder="iMessage", label_visibility="collapsed")
-    with col2:
-        send_button = st.form_submit_button("➤")
+# --- INPUT BAR + FORM ---
+with st.form("chat_form", clear_on_submit=True):
+    st.markdown('<div class="input-bar">', unsafe_allow_html=True)
+    col1, col2 = st.columns([5, 1])
+    user_input = col1.text_input("Type your question here...", label_visibility="collapsed")
+    send = col2.form_submit_button("Send", type="primary")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# --- JS INJECTION FOR INPUT BAR PLACEMENT ---
-st.markdown("""
-    <script>
-        const inputBar = document.querySelector("form");
-        const frame = document.querySelector(".iphone-frame");
-        inputBar.classList.add("input-bar");
-        frame.appendChild(inputBar);
-    </script>
-""", unsafe_allow_html=True)
-
-# --- HANDLE MESSAGE SUBMISSION ---
-if send_button and user_input.strip():
+# --- HANDLE CHAT SUBMISSION ---
+if send and user_input.strip():
     st.session_state.chat_history.append({"user": user_input.strip(), "bot": "Eco Bestie is typing..."})
     st.rerun()
 
 if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] == "Eco Bestie is typing...":
     user_text = st.session_state.chat_history[-1]["user"]
-    messages = [{"role": "system", "content": "You are Eco Bestie, a practical, kind sustainability guide. Speak clearly and calmly like a grounded best friend."}]
+    messages = [{"role": "system", "content": "You are Eco Bestie, a practical, kind sustainability guide. Speak clearly and warmly like a grounded best friend."}]
     for pair in st.session_state.chat_history[:-1]:
         messages.append({"role": "user", "content": pair["user"]})
         messages.append({"role": "assistant", "content": pair["bot"]})
@@ -173,9 +153,9 @@ if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] ==
 if st.button("🧹 Clear Chat"):
     st.session_state.chat_history = []
 
-# --- END LAYOUT ---
-st.markdown('</div>', unsafe_allow_html=True)  # Close iphone-frame
-st.markdown('</div>', unsafe_allow_html=True)  # Close iphone-shell
+# --- END FRAME ---
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # --- RESOURCE CARDS ---
 def render_cards(data, section_title):
