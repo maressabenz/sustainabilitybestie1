@@ -126,7 +126,8 @@ if user_input:
             reply = response.choices[0].message.content.strip()
             st.session_state.chat_history.append({"user": user_input, "bot": reply})
 
-            st.experimental_rerun()  # Refresh the page with updated history
+            st.rerun()
+  # Refresh the page with updated history
 
         except Exception as e:
             st.error("Oops! Something went wrong.")
@@ -135,7 +136,7 @@ if user_input:
 # --- RESET BUTTON ---
 if st.button("🧹 Start Over"):
     st.session_state.chat_history = []
-    st.experimental_rerun()
+st.rerun()
 
 
 
