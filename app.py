@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from openai import OpenAI
@@ -18,49 +17,6 @@ st.markdown("""
             color: #2f2e2d;
             border-radius: 8px;
             padding: 10px;
-        }
-        .eco-card {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 1rem;
-        }
-        .eco-link {
-            font-size: 14px;
-            color: #4a7c59;
-            text-decoration: none;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# --- LOAD DATA FROM GOOGLE SHEETS ---
-@st.cache_data
-def load_data():
-    sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9X4uUiJ62AowI-E41-Q3CfMP24rFpe6Amci5IdB7gWg8SBCZOX-q4B7J0zv2uXouNo5vBipwxSnKb/pub?output=csv"
-    return pd.read_csv(sheet_url)
-
-df = load_data()
-
-products = df[df["type"] == "product"].to_dict(orient="records")
-eco_tips = df[df["type"] == "eco_tip"].to_dict(orient="records")
-swaps = df[df["type"] == "swap"].to_dict(orient="records")
-
-# --- TITLE ---
-st.title("Hi! I'm your Eco Bestie 🌿")
-st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
-
-## --- CONVERSATION MEMORY ---
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-# --- CHAT UI STYLING ---
-st.markdown("""
-    <style>
-        html, body, [class*="css"] {
-            font-family: 'Georgia', serif;
-            background-color: #f5f3ec;
-            color: #2f2e2d;
         }
         .chat-bubble-user {
             background-color: #ffffff;
@@ -89,6 +45,26 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- LOAD DATA FROM GOOGLE SHEETS ---
+@st.cache_data
+def load_data():
+    sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9X4uUiJ62AowI-E41-Q3CfMP24rFpe6Amci5IdB7gWg8SBCZOX-q4B7J0zv2uXouNo5vBipwxSnKb/pub?output=csv"
+    return pd.read_csv(sheet_url)
+
+df = load_data()
+
+products = df[df["type"] == "product"].to_dict(orient="records")
+eco_tips = df[df["type"] == "eco_tip"].to_dict(orient="records")
+swaps = df[df["type"] == "swap"].to_dict(orient="records")
+
+# --- TITLE ---
+st.title("Hi! I'm your Eco Bestie 🌿")
+st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
+
+# --- CONVERSATION MEMORY ---
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 # --- CHAT HEADER ---
 st.markdown("### 🌿 Chat with Eco Bestie")
 
@@ -101,10 +77,7 @@ chat_html += '</div>'
 st.markdown(chat_html, unsafe_allow_html=True)
 
 # --- USER INPUT ---
-user_input = st.text_input(
-    "Type your question",
-    placeholder="e.g. What are some low-waste bathroom swaps?"
-)
+user_input = st.text_input("Type your question", placeholder="e.g. What are some low-waste bathroom swaps?")
 
 if user_input:
     with st.spinner("Eco Bestie is thinking... 🌱"):
@@ -125,9 +98,7 @@ if user_input:
 
             reply = response.choices[0].message.content.strip()
             st.session_state.chat_history.append({"user": user_input, "bot": reply})
-
-            st.rerun()
-  # Refresh the page with updated history
+            st.experimental_rerun()
 
         except Exception as e:
             st.error("Oops! Something went wrong.")
@@ -136,9 +107,7 @@ if user_input:
 # --- RESET BUTTON ---
 if st.button("🧹 Start Over"):
     st.session_state.chat_history = []
-st.rerun()
-
-
+    st.experimental_rerun()
 
 # --- DISPLAY CARDS ---
 def render_cards(data, section_title):
@@ -146,17 +115,14 @@ def render_cards(data, section_title):
     cols = st.columns(3)
     for i, item in enumerate(data):
         with cols[i % 3]:
-            # Make image clickable using separate image_link column
             image_url = item.get("image", "")
-            image_link = item.get("image_link", item.get("link", ""))  # fallback to link if image_link is missing
-
+            image_link = item.get("image_link", item.get("link", ""))
             img_html = (
                 f'<a href="{image_link}" target="_blank">'
                 f'<img src="{image_url}" style="width:100%; border-radius:12px; margin-bottom:0.5rem;" />'
                 f'</a>'
             ) if image_url else ""
 
-            # Display card with image, title, description, and CTA link
             st.markdown(f"""
                 <div style="background-color:#fff; padding:1rem; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center;">
                     {img_html}
@@ -166,7 +132,6 @@ def render_cards(data, section_title):
                 </div>
             """, unsafe_allow_html=True)
 
-            
 st.markdown("---")
 render_cards(products, "🛍 Thoughtful Product Recommendations")
 render_cards(eco_tips, "🌱 Gentle Eco Living Tips")
@@ -174,5 +139,3 @@ render_cards(swaps, "🔁 Sustainable Swaps to Try")
 
 st.markdown("---")
 st.caption("Created by Maressa Benz | The Eco Connection")
-
-
