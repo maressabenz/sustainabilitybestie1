@@ -51,7 +51,12 @@ st.title("Hi! I'm your Eco Bestie 🌿")
 st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
 
 # --- USER INPUT ---
-user_input = st.text_input("💬 Type in your question and press enter.")
+user_input = st.text_input(
+    label="💬 Type in your question and read my thoughts below.",
+    placeholder="e.g. What are beginner-friendly ways to live more sustainably?",
+    label_visibility="visible"
+)
+
 
 if user_input:
     with st.spinner("Thinking green thoughts... 🌱"):
