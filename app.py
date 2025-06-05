@@ -11,88 +11,88 @@ st.markdown("""
         html, body {
             background-color: #ecebe4;
         }
+        .iphone-shell {
+            display: flex;
+            justify-content: center;
+        }
         .iphone-frame {
-            max-width: 400px;
-            margin: 0 auto;
+            max-width: 375px;
+            width: 100%;
+            height: 740px;
             background: #fdfdfb;
             border-radius: 40px;
-            padding: 15px 10px 60px 10px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.15);
-            border: 10px solid #d4d4d4;
+            border: 10px solid #ccc;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.2);
             position: relative;
-            height: 700px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            overflow: hidden;
         }
         .iphone-notch {
             width: 60px;
             height: 20px;
             background-color: #d4d4d4;
             border-radius: 10px;
-            margin: 0 auto 10px auto;
+            margin: 8px auto;
         }
         .chat-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px 12px 60px 12px;
             display: flex;
             flex-direction: column;
-            overflow-y: scroll;
-            flex-grow: 1;
-            padding: 10px;
-            scrollbar-width: thin;
         }
         .bubble-user {
-            background-color: #bfeec2;
-            color: #1b1b1b;
-            border-radius: 18px;
+            background-color: #00c759;
+            color: white;
+            border-radius: 20px;
             padding: 10px 14px;
             margin: 6px 0;
-            max-width: 80%;
+            max-width: 75%;
             align-self: flex-end;
-            margin-left: auto;
         }
         .bubble-bot {
-            background-color: #e6e6eb;
+            background-color: #e5e5ea;
             color: #1b1b1b;
-            border-radius: 18px;
+            border-radius: 20px;
             padding: 10px 14px;
             margin: 6px 0;
-            max-width: 80%;
+            max-width: 75%;
             align-self: flex-start;
         }
         .typing-indicator {
-            background-color: #e6e6eb;
-            color: #1b1b1b;
-            border-radius: 18px;
-            padding: 6px 12px;
+            background-color: #e5e5ea;
+            border-radius: 20px;
+            padding: 6px 14px;
             margin: 6px 0;
-            max-width: 80%;
-            align-self: flex-start;
+            max-width: 75%;
             font-style: italic;
             opacity: 0.7;
         }
-        .input-wrapper {
+        .input-bar {
             position: absolute;
-            bottom: 15px;
-            left: 10px;
-            right: 10px;
+            bottom: 10px;
+            left: 12px;
+            right: 12px;
             display: flex;
             align-items: center;
-        }
-        .input-wrapper input {
-            flex-grow: 1;
+            background-color: #f1f1f1;
             border-radius: 999px;
-            padding: 12px 50px 12px 15px;
-            border: 1px solid #ccc;
+            padding: 10px 12px;
+        }
+        .input-bar input {
+            flex-grow: 1;
+            border: none;
             outline: none;
+            background: transparent;
             font-size: 14px;
         }
-        .send-button {
-            position: absolute;
-            right: 20px;
+        .input-bar button {
             background: none;
             border: none;
-            color: #4a7c59;
-            font-weight: bold;
+            font-size: 18px;
+            color: #00c759;
+            margin-left: 10px;
             cursor: pointer;
         }
     </style>
@@ -115,47 +115,44 @@ if "chat_history" not in st.session_state:
 if "user_input" not in st.session_state:
     st.session_state.user_input = ""
 
-# --- IPHONE FRAME ---
+# --- LAYOUT: IPHONE SHELL ---
+st.markdown('<div class="iphone-shell">', unsafe_allow_html=True)
 st.markdown('<div class="iphone-frame">', unsafe_allow_html=True)
 st.markdown('<div class="iphone-notch"></div>', unsafe_allow_html=True)
-st.markdown('<div class="chat-area">', unsafe_allow_html=True)
 
-# --- DISPLAY CHAT HISTORY ---
+# --- CHAT AREA ---
+st.markdown('<div class="chat-area">', unsafe_allow_html=True)
 for chat in st.session_state.chat_history:
     st.markdown(f'<div class="bubble-user">{chat["user"]}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="bubble-bot">{chat["bot"]}</div>', unsafe_allow_html=True)
-
-# --- CHAT FORM ---
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('<div class="input-wrapper">', unsafe_allow_html=True)
-form = st.form(key="chat_form", clear_on_submit=True)
-col1, col2 = form.columns([5, 1])
-user_input = col1.text_input("", placeholder="Send a message...", label_visibility="collapsed")
-send_button = col2.form_submit_button("➤")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- HANDLE SUBMISSION ---
+# --- INPUT BAR ---
+with st.form(key="chat_form", clear_on_submit=True):
+    col1, col2 = st.columns([6, 1])
+    with col1:
+        user_input = st.text_input("", placeholder="iMessage", label_visibility="collapsed")
+    with col2:
+        send_button = st.form_submit_button("➤")
+
+# --- JS INJECTION FOR INPUT BAR PLACEMENT ---
+st.markdown("""
+    <script>
+        const inputBar = document.querySelector("form");
+        const frame = document.querySelector(".iphone-frame");
+        inputBar.classList.add("input-bar");
+        frame.appendChild(inputBar);
+    </script>
+""", unsafe_allow_html=True)
+
+# --- HANDLE MESSAGE SUBMISSION ---
 if send_button and user_input.strip():
-    with st.spinner("Eco Bestie is typing... 🌿"):
-        try:
-            messages = [{"role": "system", "content": "You are Eco Bestie, a kind, grounded sustainability guide who speaks in a warm, clear tone. No fantasy, just practical, emotionally intelligent guidance."}]
-            for pair in st.session_state.chat_history:
-                messages.append({"role": "user", "content": pair["user"]})
-                messages.append({"role": "assistant", "content": pair["bot"]})
-            messages.append({"role": "user", "content": user_input.strip()})
+    st.session_state.chat_history.append({"user": user_input.strip(), "bot": "Eco Bestie is typing..."})
+    st.rerun()
 
-            # Temporary typing bubble
-            st.session_state.chat_history.append({"user": user_input.strip(), "bot": "Eco Bestie is typing..."})
-            st.rerun()
-
-        except Exception as e:
-            st.error("Something went wrong.")
-            st.code(str(e))
-
-# --- POST TYPING SIMULATION ---
 if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] == "Eco Bestie is typing...":
     user_text = st.session_state.chat_history[-1]["user"]
-    messages = [{"role": "system", "content": "You are Eco Bestie, a kind, grounded sustainability guide who speaks in a warm, clear tone. No fantasy, just practical, emotionally intelligent guidance."}]
+    messages = [{"role": "system", "content": "You are Eco Bestie, a practical, kind sustainability guide. Speak clearly and calmly like a grounded best friend."}]
     for pair in st.session_state.chat_history[:-1]:
         messages.append({"role": "user", "content": pair["user"]})
         messages.append({"role": "assistant", "content": pair["bot"]})
@@ -176,7 +173,11 @@ if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] ==
 if st.button("🧹 Clear Chat"):
     st.session_state.chat_history = []
 
-# --- DISPLAY CARDS ---
+# --- END LAYOUT ---
+st.markdown('</div>', unsafe_allow_html=True)  # Close iphone-frame
+st.markdown('</div>', unsafe_allow_html=True)  # Close iphone-shell
+
+# --- RESOURCE CARDS ---
 def render_cards(data, section_title):
     st.markdown(f"## {section_title}")
     cols = st.columns(3)
