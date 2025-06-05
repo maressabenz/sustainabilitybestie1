@@ -55,7 +55,7 @@ st.write("I'm here to help you live more gently with the Earth. Ask me anything 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-st.markdown("### 💬 Your Conversation with Eco Bestie")
+st.markdown("### Your Conversation with Eco Bestie")
 
 # Display chat history
 for msg in st.session_state.chat_history:
@@ -64,8 +64,9 @@ for msg in st.session_state.chat_history:
 
 # Input field
 user_input = st.text_input(
-    "Ask me something new 🌿",
-    placeholder="e.g. What are eco-friendly alternatives to paper towels?"
+    label="💬 Type in your question and press enter.",
+    placeholder="e.g. What are beginner-friendly ways to live more sustainably?",
+    label_visibility="visible"
 )
 
 # Process new input
