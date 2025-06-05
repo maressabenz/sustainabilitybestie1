@@ -2,86 +2,62 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 
-# --- CONFIG & STYLE ---
-st.set_page_config(page_title="Eco Bestie by The Eco Connection🌿", layout="centered")
+# --- CONFIG ---
+st.set_page_config(page_title="Eco Bestie 🌿", layout="centered")
 
+# --- STYLE ---
 st.markdown("""
     <style>
-        html, body {
-            background-color: #ecebe4;
+        body {
+            background-color: #f4f1ea;
+            font-family: 'Georgia', serif;
         }
-        .iphone-shell {
-            display: flex;
-            justify-content: center;
+        .chat-container {
+            max-width: 700px;
+            margin: auto;
+            padding: 1rem;
         }
-        .iphone-frame {
-            max-width: 375px;
-            width: 100%;
-            height: 740px;
-            background: #fdfdfb;
-            border-radius: 40px;
-            border: 10px solid #ccc;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.2);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .iphone-notch {
-            width: 60px;
-            height: 20px;
-            background-color: #d4d4d4;
-            border-radius: 10px;
-            margin: 8px auto 4px auto;
-        }
-        .chat-area {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-        }
-        .bubble-user {
-            background-color: #00c759;
-            color: white;
+        .user-bubble {
+            background-color: #d8f3dc;
+            color: #1b1b1b;
             border-radius: 20px;
-            padding: 10px 14px;
-            margin: 6px 0;
+            padding: 12px 16px;
+            margin: 8px 0;
             max-width: 75%;
             align-self: flex-end;
         }
-        .bubble-bot {
-            background-color: #e5e5ea;
-            color: #1b1b1b;
+        .bot-bubble {
+            background-color: #fff;
+            color: #2f2e2d;
             border-radius: 20px;
-            padding: 10px 14px;
-            margin: 6px 0;
+            padding: 12px 16px;
+            margin: 8px 0;
             max-width: 75%;
             align-self: flex-start;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .chat-wrap {
+            display: flex;
+            flex-direction: column;
         }
         .input-bar {
-            padding: 10px 12px;
+            margin-top: 1rem;
             display: flex;
             gap: 10px;
-            align-items: center;
-            background-color: #f1f1f1;
-            border-top: 1px solid #ccc;
         }
         .input-bar input {
-            flex-grow: 1;
+            flex: 1;
+            padding: 12px;
             border-radius: 999px;
-            padding: 10px 16px;
             border: 1px solid #ccc;
             outline: none;
-            font-size: 14px;
         }
         .send-button {
-            background-color: #00c759;
-            border: none;
-            color: white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 999px;
-            font-size: 14px;
+            border: none;
+            background-color: #40916c;
+            color: white;
             font-weight: bold;
             cursor: pointer;
         }
@@ -99,40 +75,36 @@ products = df[df["type"] == "product"].to_dict(orient="records")
 eco_tips = df[df["type"] == "eco_tip"].to_dict(orient="records")
 swaps = df[df["type"] == "swap"].to_dict(orient="records")
 
-# --- SESSION STATE ---
+# --- CHAT STATE ---
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "user_input" not in st.session_state:
     st.session_state.user_input = ""
 
-# --- LAYOUT: IPHONE SHELL ---
-st.markdown('<div class="iphone-shell">', unsafe_allow_html=True)
-st.markdown('<div class="iphone-frame">', unsafe_allow_html=True)
-st.markdown('<div class="iphone-notch"></div>', unsafe_allow_html=True)
+# --- MAIN APP LAYOUT ---
+st.title("🌿 Eco Bestie")
+st.write("Ask anything about sustainable living, conscious swaps, or gentle habits for the planet.")
 
-# --- CHAT AREA ---
-st.markdown('<div class="chat-area">', unsafe_allow_html=True)
-for chat in st.session_state.chat_history:
-    st.markdown(f'<div class="bubble-user">{chat["user"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="bubble-bot">{chat["bot"]}</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="chat-container"><div class="chat-wrap">', unsafe_allow_html=True)
+for pair in st.session_state.chat_history:
+    st.markdown(f'<div class="user-bubble">🧍‍♀️ {pair["user"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="bot-bubble">🌿 {pair["bot"]}</div>', unsafe_allow_html=True)
+st.markdown('</div></div>', unsafe_allow_html=True)
 
-# --- INPUT BAR + FORM ---
+# --- INPUT BAR ---
 with st.form("chat_form", clear_on_submit=True):
-    st.markdown('<div class="input-bar">', unsafe_allow_html=True)
     col1, col2 = st.columns([5, 1])
-    user_input = col1.text_input("Type your question here...", label_visibility="collapsed")
-    send = col2.form_submit_button("Send", type="primary")
-    st.markdown('</div>', unsafe_allow_html=True)
+    user_input = col1.text_input("Type your question", label_visibility="collapsed", placeholder="Type your question here...")
+    submitted = col2.form_submit_button("Send")
+    if submitted and user_input.strip():
+        st.session_state.chat_history.append({"user": user_input.strip(), "bot": "Eco Bestie is thinking..."})
+        st.session_state.user_input = user_input.strip()
+        st.experimental_rerun()
 
-# --- HANDLE CHAT SUBMISSION ---
-if send and user_input.strip():
-    st.session_state.chat_history.append({"user": user_input.strip(), "bot": "Eco Bestie is typing..."})
-    st.rerun()
-
-if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] == "Eco Bestie is typing...":
+# --- GET RESPONSE ---
+if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] == "Eco Bestie is thinking...":
     user_text = st.session_state.chat_history[-1]["user"]
-    messages = [{"role": "system", "content": "You are Eco Bestie, a practical, kind sustainability guide. Speak clearly and warmly like a grounded best friend."}]
+    messages = [{"role": "system", "content": "You are Eco Bestie, a practical, kind sustainability guide who speaks warmly and clearly."}]
     for pair in st.session_state.chat_history[:-1]:
         messages.append({"role": "user", "content": pair["user"]})
         messages.append({"role": "assistant", "content": pair["bot"]})
@@ -147,15 +119,11 @@ if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] ==
     )
     reply = response.choices[0].message.content.strip()
     st.session_state.chat_history[-1]["bot"] = reply
-    st.rerun()
+    st.experimental_rerun()
 
-# --- RESET CHAT ---
-if st.button("🧹 Clear Chat"):
+# --- RESET BUTTON ---
+if st.button("🧹 Start Over"):
     st.session_state.chat_history = []
-
-# --- END FRAME ---
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
 # --- RESOURCE CARDS ---
 def render_cards(data, section_title):
