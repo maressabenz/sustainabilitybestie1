@@ -57,13 +57,15 @@ products = df[df["type"] == "product"].to_dict(orient="records")
 eco_tips = df[df["type"] == "eco_tip"].to_dict(orient="records")
 swaps = df[df["type"] == "swap"].to_dict(orient="records")
 
-# --- TITLE ---
+# --- TITLE & MEMORY SETUP ---
 st.title("Hi! I'm your Eco Bestie 🌿")
 st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
 
-# --- CONVERSATION MEMORY ---
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
+if "user_input_clear" not in st.session_state:
+    st.session_state["user_input_clear"] = ""
 
 # --- CHAT HEADER ---
 st.markdown("### 🌿 Chat with Eco Bestie")
@@ -76,9 +78,14 @@ for pair in st.session_state.chat_history:
 chat_html += '</div>'
 st.markdown(chat_html, unsafe_allow_html=True)
 
-# --- USER INPUT ---
-user_input = st.text_input("Type your question", placeholder="e.g. What are some low-waste bathroom swaps?")
+# --- USER INPUT FIELD ---
+user_input = st.text_input(
+    "Type your question",
+    value=st.session_state.get("user_input_clear", ""),
+    placeholder="e.g. What are some low-waste bathroom swaps?"
+)
 
+# --- HANDLE USER INPUT ---
 if user_input:
     with st.spinner("Eco Bestie is thinking... 🌱"):
         try:
@@ -98,15 +105,17 @@ if user_input:
 
             reply = response.choices[0].message.content.strip()
             st.session_state.chat_history.append({"user": user_input, "bot": reply})
+            st.session_state["user_input_clear"] = ""  # prevent reprocessing input
             st.rerun()
 
         except Exception as e:
             st.error("Oops! Something went wrong.")
             st.code(str(e))
 
-# --- RESET BUTTON ---
+# --- RESET CHAT BUTTON ---
 if st.button("🧹 Start Over"):
     st.session_state.chat_history = []
+    st.session_state["user_input_clear"] = ""
     st.rerun()
 
 # --- DISPLAY CARDS ---
@@ -132,10 +141,10 @@ def render_cards(data, section_title):
                 </div>
             """, unsafe_allow_html=True)
 
+# --- RENDER RESOURCE SECTIONS ---
 st.markdown("---")
 render_cards(products, "🛍 Thoughtful Product Recommendations")
 render_cards(eco_tips, "🌱 Gentle Eco Living Tips")
 render_cards(swaps, "🔁 Sustainable Swaps to Try")
-
 st.markdown("---")
 st.caption("Created by Maressa Benz | The Eco Connection")
