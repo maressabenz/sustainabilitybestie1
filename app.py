@@ -4,7 +4,7 @@ import pandas as pd
 from openai import OpenAI
 
 # --- CONFIG & STYLE ---
-st.set_page_config(page_title="Eco Bestie 🌿", layout="wide")
+st.set_page_config(page_title="Hi! I'm your Eco Bestie 🌿", layout="wide")
 
 st.markdown("""
     <style>
@@ -47,27 +47,27 @@ eco_tips = df[df["type"] == "eco_tip"].to_dict(orient="records")
 swaps = df[df["type"] == "swap"].to_dict(orient="records")
 
 # --- TITLE ---
-st.title("🌿 Your Eco Bestie")
-st.write("Hi love — I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
+st.title("Hi! I'm your Eco Bestie 🌿")
+st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
 
 # --- USER INPUT ---
-user_input = st.text_input("💬 What would you like to ask?")
+user_input = st.text_input("💬 Type in your question and read my thoughts below.")
 
 if user_input:
-    with st.spinner("Gathering gentle wisdom... 🌱"):
+    with st.spinner("Thinking green thoughts... 🌱"):
         try:
             client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are Eco Bestie — a warm, encouraging guide who helps people reconnect with nature, reduce waste, and live more intentionally. Your tone is poetic, whimsical, and empowering. Avoid sounding too robotic or corporate."},
+                    {"role": "system", "content": "You are Eco Bestie — a warm, encouraging guide who helps people reconnect with nature, reduce waste, and live more intentionally. Write this in the voice of The Eco Connection: soft yet clear, reflective but grounded, poetic but not abstract. Speak like a gentle guide. Use language that feels earthy, intentional, and emotionally intelligent. Avoid corporate speak, urgency, or anything overly technical — but don’t oversimplify. Think solarpunk, slow living, and systems-level care."},
                     {"role": "user", "content": user_input}
                 ],
                 temperature=0.7,
                 max_tokens=300
             )
             answer = response.choices[0].message.content
-            st.markdown("### 🌸 Here's your tip:")
+            st.markdown("### Here's your tip:")
             st.write(answer)
         except Exception as e:
             st.warning("🌧 Hmm... something went wrong. Try again in a bit.")
@@ -106,6 +106,6 @@ render_cards(eco_tips, "🌱 Gentle Eco Living Tips")
 render_cards(swaps, "🔁 Sustainable Swaps to Try")
 
 st.markdown("---")
-st.caption("Created with 🍃 by The Eco Connection | Personalized by Streamlit & OpenAI")
+st.caption("Created by Maressa Benz | The Eco Connection")
 
 
