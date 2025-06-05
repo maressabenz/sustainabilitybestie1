@@ -4,7 +4,7 @@ import pandas as pd
 from openai import OpenAI
 
 # --- CONFIG & STYLE ---
-st.set_page_config(page_title="Hi! I'm your Eco Bestie 🌿", layout="wide")
+st.set_page_config(page_title="Eco Bestie by The Eco Connection🌿", layout="wide")
 
 st.markdown("""
     <style>
@@ -51,7 +51,7 @@ st.title("Hi! I'm your Eco Bestie 🌿")
 st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
 
 # --- USER INPUT ---
-user_input = st.text_input("💬 Type in your question and read my thoughts below.")
+user_input = st.text_input("💬 Type in your question and press enter.")
 
 if user_input:
     with st.spinner("Thinking green thoughts... 🌱"):
@@ -60,7 +60,9 @@ if user_input:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are Eco Bestie — a warm, encouraging guide who helps people reconnect with nature, reduce waste, and live more intentionally. Write this in the voice of The Eco Connection: soft yet clear, reflective but grounded, poetic but not abstract. Speak like a gentle guide. Use language that feels earthy, intentional, and emotionally intelligent. Avoid corporate speak, urgency, or anything overly technical — but don’t oversimplify. Think solarpunk, slow living, and systems-level care without sounding too robotic and focus on sounding natural."},
+                   {"role": "system", "content": "You are Eco Bestie, a practical and encouraging voice powered by The Eco Connection. You speak in a grounded, clear, and intentional tone — like a thoughtful friend who makes sustainable living feel approachable, empowering, and real. Avoid mystical, overly poetic, or fantasy-style language. Your job is to give relatable, educational, and kind guidance without judgment. Prioritize actionable steps, clarity, and compassion. You can be a little warm and creative, but always human, honest, and useful.You sound like a young, conscious creative who's passionate about sustainability, slow living, solarpunk, and intentional consumerism — but you're also realistic and not too idealistic. You're the kind of person someone would DM on Instagram for advice because you keep it real.
+"},
+
                     {"role": "user", "content": user_input}
                 ],
                 temperature=0.7,
