@@ -2,130 +2,114 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 
-# --- CONFIG ---
-st.set_page_config(page_title="Eco Bestie 🌿", layout="centered")
+# --- CONFIG & STYLE ---
+st.set_page_config(page_title="Eco Bestie by The Eco Connection🌿", layout="wide")
 
-# --- STYLE ---
 st.markdown("""
     <style>
-        body {
-            background-color: #f4f1ea;
+        html, body, [class*="css"] {
             font-family: 'Georgia', serif;
+            background-color: #f5f3ec;
+            color: #2f2e2d;
+        }
+        .stTextInput input {
+            background-color: #fff8f1;
+            color: #2f2e2d;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .chat-bubble-user {
+            background-color: #ffffff;
+            color: #2f2e2d;
+            border-radius: 18px;
+            padding: 10px 15px;
+            margin: 5px 0;
+            max-width: 60%;
+            align-self: flex-end;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .chat-bubble-bot {
+            background-color: #d6e8c5;
+            color: #2f2e2d;
+            border-radius: 18px;
+            padding: 10px 15px;
+            margin: 5px 0;
+            max-width: 60%;
+            align-self: flex-start;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .chat-container {
-            max-width: 700px;
-            margin: auto;
-            padding: 1rem;
-        }
-        .user-bubble {
-            background-color: #d8f3dc;
-            color: #1b1b1b;
-            border-radius: 20px;
-            padding: 12px 16px;
-            margin: 8px 0;
-            max-width: 75%;
-            align-self: flex-end;
-        }
-        .bot-bubble {
-            background-color: #fff;
-            color: #2f2e2d;
-            border-radius: 20px;
-            padding: 12px 16px;
-            margin: 8px 0;
-            max-width: 75%;
-            align-self: flex-start;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-        .chat-wrap {
             display: flex;
             flex-direction: column;
-        }
-        .input-bar {
-            margin-top: 1rem;
-            display: flex;
-            gap: 10px;
-        }
-        .input-bar input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 999px;
-            border: 1px solid #ccc;
-            outline: none;
-        }
-        .send-button {
-            padding: 10px 20px;
-            border-radius: 999px;
-            border: none;
-            background-color: #40916c;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# --- LOAD DATA ---
+# --- LOAD DATA FROM GOOGLE SHEETS ---
 @st.cache_data
 def load_data():
     sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9X4uUiJ62AowI-E41-Q3CfMP24rFpe6Amci5IdB7gWg8SBCZOX-q4B7J0zv2uXouNo5vBipwxSnKb/pub?output=csv"
     return pd.read_csv(sheet_url)
 
 df = load_data()
+
 products = df[df["type"] == "product"].to_dict(orient="records")
 eco_tips = df[df["type"] == "eco_tip"].to_dict(orient="records")
 swaps = df[df["type"] == "swap"].to_dict(orient="records")
 
-# --- CHAT STATE ---
+# --- TITLE ---
+st.title("Hi! I'm your Eco Bestie 🌿")
+st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
+
+# --- CONVERSATION MEMORY ---
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-if "user_input" not in st.session_state:
-    st.session_state.user_input = ""
 
-# --- MAIN APP LAYOUT ---
-st.title("🌿 Eco Bestie")
-st.write("Ask anything about sustainable living, conscious swaps, or gentle habits for the planet.")
+# --- CHAT HEADER ---
+st.markdown("### 🌿 Chat with Eco Bestie")
 
-st.markdown('<div class="chat-container"><div class="chat-wrap">', unsafe_allow_html=True)
+# --- DISPLAY CHAT HISTORY ---
+chat_html = '<div class="chat-container">'
 for pair in st.session_state.chat_history:
-    st.markdown(f'<div class="user-bubble">🧍‍♀️ {pair["user"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="bot-bubble">🌿 {pair["bot"]}</div>', unsafe_allow_html=True)
-st.markdown('</div></div>', unsafe_allow_html=True)
+    chat_html += f'<div class="chat-bubble-user"><b>You:</b> {pair["user"]}</div>'
+    chat_html += f'<div class="chat-bubble-bot"><b>Eco Bestie:</b> {pair["bot"]}</div>'
+chat_html += '</div>'
+st.markdown(chat_html, unsafe_allow_html=True)
 
-# --- INPUT BAR ---
-with st.form("chat_form", clear_on_submit=True):
-    col1, col2 = st.columns([5, 1])
-    user_input = col1.text_input("Type your question", label_visibility="collapsed", placeholder="Type your question here...")
-    submitted = col2.form_submit_button("Send")
-    if submitted and user_input.strip():
-        st.session_state.chat_history.append({"user": user_input.strip(), "bot": "Eco Bestie is thinking..."})
-        st.session_state.user_input = user_input.strip()
-st.rerun()
+# --- USER INPUT ---
+user_input = st.text_input("Type your question", placeholder="e.g. What are some low-waste bathroom swaps?")
 
-# --- GET RESPONSE ---
-if st.session_state.chat_history and st.session_state.chat_history[-1]["bot"] == "Eco Bestie is thinking...":
-    user_text = st.session_state.chat_history[-1]["user"]
-    messages = [{"role": "system", "content": "You are Eco Bestie, a practical, kind sustainability guide who speaks warmly and clearly."}]
-    for pair in st.session_state.chat_history[:-1]:
-        messages.append({"role": "user", "content": pair["user"]})
-        messages.append({"role": "assistant", "content": pair["bot"]})
-    messages.append({"role": "user", "content": user_text})
+if user_input:
+    with st.spinner("Eco Bestie is thinking... 🌱"):
+        try:
+            messages = [{"role": "system", "content": "You are Eco Bestie, a grounded, practical, and kind sustainability guide who speaks like a thoughtful friend. Avoid fantasy language. Keep it real, relatable, and warm."}]
+            for pair in st.session_state.chat_history:
+                messages.append({"role": "user", "content": pair["user"]})
+                messages.append({"role": "assistant", "content": pair["bot"]})
+            messages.append({"role": "user", "content": user_input})
 
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=messages,
-        temperature=0.65,
-        max_tokens=600
-    )
-    reply = response.choices[0].message.content.strip()
-    st.session_state.chat_history[-1]["bot"] = reply
-st.rerun()
+            client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+                temperature=0.65,
+                max_tokens=600
+            )
+
+            reply = response.choices[0].message.content.strip()
+            st.session_state.chat_history.append({"user": user_input, "bot": reply})
+            st.rerun()
+
+        except Exception as e:
+            st.error("Oops! Something went wrong.")
+            st.code(str(e))
 
 # --- RESET BUTTON ---
 if st.button("🧹 Start Over"):
     st.session_state.chat_history = []
+    st.rerun()
 
-# --- RESOURCE CARDS ---
+# --- DISPLAY CARDS ---
 def render_cards(data, section_title):
     st.markdown(f"## {section_title}")
     cols = st.columns(3)
@@ -152,5 +136,6 @@ st.markdown("---")
 render_cards(products, "🛍 Thoughtful Product Recommendations")
 render_cards(eco_tips, "🌱 Gentle Eco Living Tips")
 render_cards(swaps, "🔁 Sustainable Swaps to Try")
+
 st.markdown("---")
 st.caption("Created by Maressa Benz | The Eco Connection")
