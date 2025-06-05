@@ -51,32 +51,59 @@ st.title("Hi! I'm your Eco Bestie 🌿")
 st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
 
 # --- USER INPUT ---
+# --- CHAT MEMORY SETUP ---
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+st.markdown("### 💬 Your Conversation with Eco Bestie")
+
+# Display chat history
+for msg in st.session_state.chat_history:
+    st.markdown(f"**You:** {msg['user']}")
+    st.markdown(f"**Eco Bestie:** {msg['bot']}")
+
+# Input field
 user_input = st.text_input(
-    label="💬 Type in your question and read my thoughts below.",
-    placeholder="e.g. What are beginner-friendly ways to live more sustainably?",
-    label_visibility="visible"
+    "Ask me something new 🌿",
+    placeholder="e.g. What are eco-friendly alternatives to paper towels?"
 )
 
-
+# Process new input
 if user_input:
     with st.spinner("Thinking green thoughts... 🌱"):
         try:
+            # Build message history
+            messages = [{"role": "system", "content": "You are Eco Bestie, a kind, grounded, and approachable sustainability guide. Be warm, helpful, and never too formal."}]
+            for pair in st.session_state.chat_history:
+                messages.append({"role": "user", "content": pair["user"]})
+                messages.append({"role": "assistant", "content": pair["bot"]})
+            messages.append({"role": "user", "content": user_input})
+
             client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
-                messages=[
-                   {"role": "system", "content": "You are Eco Bestie, a practical and encouraging voice powered by The Eco Connection. You speak in a grounded, clear, and intentional tone — like a thoughtful friend who makes sustainable living feel approachable, empowering, and real. Avoid mystical, overly poetic, or fantasy-style language. Your job is to give relatable, educational, and kind guidance without judgment. Prioritize actionable steps, clarity, and compassion. You can be a little warm and creative, but always human, honest, and useful.You sound like a young, conscious creative who's passionate about sustainability, slow living, solarpunk, and intentional consumerism — but you're also realistic and not too idealistic. You're the kind of person someone would DM on Instagram for advice because you keep it real."},
-                    {"role": "user", "content": user_input}
-                ],
-                temperature=0.7,
-                max_tokens=300
+                messages=messages,
+                temperature=0.65,
+                max_tokens=600
             )
-            answer = response.choices[0].message.content
-            st.markdown("### Here's your tip:")
-            st.write(answer)
+
+            reply = response.choices[0].message.content.strip()
+
+            # Store in session
+            st.session_state.chat_history.append({"user": user_input, "bot": reply})
+
+            # Show new messages
+            st.markdown(f"**You:** {user_input}")
+            st.markdown(f"**Eco Bestie:** {reply}")
+
         except Exception as e:
-            st.warning("🌧 Hmm... something went wrong. Try again in a bit.")
+            st.error("Oops! Something went wrong.")
             st.code(str(e))
+
+# Optional: reset button
+if st.button("🧹 Start over"):
+    st.session_state.chat_history = []
+
 
 # --- DISPLAY CARDS ---
 def render_cards(data, section_title):
