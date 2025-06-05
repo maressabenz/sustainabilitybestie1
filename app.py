@@ -50,31 +50,66 @@ swaps = df[df["type"] == "swap"].to_dict(orient="records")
 st.title("Hi! I'm your Eco Bestie 🌿")
 st.write("I'm here to help you live more gently with the Earth. Ask me anything about sustainability, eco-friendly swaps, or how to reconnect with nature. 🌸")
 
-# --- USER INPUT ---
-# --- CHAT MEMORY SETUP ---
+## --- CONVERSATION MEMORY ---
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-st.markdown("### Your Conversation with Eco Bestie")
+# --- CHAT UI STYLING ---
+st.markdown("""
+    <style>
+        html, body, [class*="css"] {
+            font-family: 'Georgia', serif;
+            background-color: #f5f3ec;
+            color: #2f2e2d;
+        }
+        .chat-bubble-user {
+            background-color: #ffffff;
+            color: #2f2e2d;
+            border-radius: 18px;
+            padding: 10px 15px;
+            margin: 5px 0;
+            max-width: 60%;
+            align-self: flex-end;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .chat-bubble-bot {
+            background-color: #d6e8c5;
+            color: #2f2e2d;
+            border-radius: 18px;
+            padding: 10px 15px;
+            margin: 5px 0;
+            max-width: 60%;
+            align-self: flex-start;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-# Display chat history
-for msg in st.session_state.chat_history:
-    st.markdown(f"**You:** {msg['user']}")
-    st.markdown(f"**Eco Bestie:** {msg['bot']}")
+# --- CHAT HEADER ---
+st.markdown("### 🌿 Chat with Eco Bestie")
 
-# Input field
+# --- DISPLAY CHAT HISTORY ---
+chat_html = '<div class="chat-container">'
+for pair in st.session_state.chat_history:
+    chat_html += f'<div class="chat-bubble-user"><b>You:</b> {pair["user"]}</div>'
+    chat_html += f'<div class="chat-bubble-bot"><b>Eco Bestie:</b> {pair["bot"]}</div>'
+chat_html += '</div>'
+st.markdown(chat_html, unsafe_allow_html=True)
+
+# --- USER INPUT ---
 user_input = st.text_input(
-    label="💬 Type in your question and press enter.",
-    placeholder="e.g. What are beginner-friendly ways to live more sustainably?",
-    label_visibility="visible"
+    "Type your question",
+    placeholder="e.g. What are some low-waste bathroom swaps?"
 )
 
-# Process new input
 if user_input:
-    with st.spinner("Thinking green thoughts... 🌱"):
+    with st.spinner("Eco Bestie is thinking... 🌱"):
         try:
-            # Build message history
-            messages = [{"role": "system", "content": "You are Eco Bestie, a kind, grounded, and approachable sustainability guide. Be warm, helpful, and never too formal."}]
+            messages = [{"role": "system", "content": "You are Eco Bestie, a grounded, practical, and kind sustainability guide who speaks like a thoughtful friend. Avoid fantasy language. Keep it real, relatable, and warm."}]
             for pair in st.session_state.chat_history:
                 messages.append({"role": "user", "content": pair["user"]})
                 messages.append({"role": "assistant", "content": pair["bot"]})
@@ -89,21 +124,19 @@ if user_input:
             )
 
             reply = response.choices[0].message.content.strip()
-
-            # Store in session
             st.session_state.chat_history.append({"user": user_input, "bot": reply})
 
-            # Show new messages
-            st.markdown(f"**You:** {user_input}")
-            st.markdown(f"**Eco Bestie:** {reply}")
+            st.experimental_rerun()  # Refresh the page with updated history
 
         except Exception as e:
             st.error("Oops! Something went wrong.")
             st.code(str(e))
 
-# Optional: reset button
-if st.button("🧹 Start over"):
+# --- RESET BUTTON ---
+if st.button("🧹 Start Over"):
     st.session_state.chat_history = []
+    st.experimental_rerun()
+
 
 
 # --- DISPLAY CARDS ---
